@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+from bitstring import BitStream
 class PDU:
     line = None
     sca = None
@@ -45,13 +46,26 @@ class PDU:
         udh = None    
         text = None 
         def __init__(self, bt, udhi, dsc):
+            def unpack(b):
+                for i in b: print("{:02X}".format(i))
+                roct = b[::-1]
+                rb = BitStream(roct).bin
+                rs = []
+                for i in range(len(rb)-7, -1, -7):
+                    rs.append(int(rb[i:i+7],2))
+                print(rs)
+                return bytes(rs)
             if udhi : #long sms 
                 if dsc: #UCS2
                     self.udh = self.UDH(bt)
                     self.text = bt[self.udh.udhl+1:].decode("utf-16-be")
+                else:
+                    self.text = unpack(bt[self.udh.udhl+1:]).decode("ascii")
             else:
                 if dsc: #UCS2
                     self.text = bt.decode("utf-16-be")
+                else:
+                    self.text = unpack(bt).decode("ascii")
     ud = None
     def __init__(self, ln):
         self.line = ln
