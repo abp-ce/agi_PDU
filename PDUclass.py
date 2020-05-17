@@ -56,15 +56,15 @@ class PDU:
                 print(rs)
                 return bytes(rs)
             if udhi : #long sms 
-                if dsc: #UCS2
+                if (dsc == 0x8) or (dsc == 0x18): #UCS2
                     self.udh = self.UDH(bt)
                     self.text = bt[self.udh.udhl+1:].decode("utf-16-be")
-                else:
+                elif (dsc == 0x0) or (dsc == 0x10): # 7-bit ascii
                     self.text = unpack(bt[self.udh.udhl+1:]).decode("ascii")
             else:
-                if dsc: #UCS2
+                if (dsc == 0x8) or (dsc == 0x18): #UCS2
                     self.text = bt.decode("utf-16-be")
-                else:
+                elif (dsc == 0x0) or (dsc == 0x10): # 7-bit ascii
                     self.text = unpack(bt).decode("ascii")
     ud = None
     def __init__(self, ln):
